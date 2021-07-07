@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: name-app
+  labels:
+    app: name-app
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: name-app
+  template:
+    metadata:
+      labels:
+        app: name-app
+    spec:
+      containers:
+        - name: main-container
+          image: yasintahaerol/py-app:13
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: config-vol
+              mountPath: /app/config-vol/conf.json
+              readOnly: true
+            - name: secret-vol
+              mountPath: /etc/secret-vol
+              readOnly: true
+        - name: side-container
+          image: nginx
+          volumeMounts:
+            - name: config-vol
+              mountPath: /etc/config-vol/conf.json
+              subPath: conf.json
+            - name: secret-vol
+              mountPath: /etc/secret-vol
+      volumes:
+        - name: config-vol
+          configMap:
+            name: appconfig
+            items:
+              - key: my-conf.json
+                path: conf.json
+        - name: secret-vol
+          secret:
+            secretName: my-secret
+            #items:
+              #- key: secret.conf
+                #path: secret.json
+
+
+

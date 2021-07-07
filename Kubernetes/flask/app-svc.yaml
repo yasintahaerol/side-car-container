@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: name-app-svc
+  labels:
+    name: name-app
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    app: name-app
+  type: NodePort
+
