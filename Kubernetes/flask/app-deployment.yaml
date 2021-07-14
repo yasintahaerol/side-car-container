@@ -5,49 +5,54 @@ metadata:
   labels:
     app: name-app
 spec:
-  replicas: 5
+  replicas: 3
   selector:
     matchLabels:
       app: name-app
   template:
     metadata:
+      annotations:
       labels:
         app: name-app
     spec:
+      serviceAccountName: name-app
       containers:
         - name: main-container
-          image: yasintahaerol/py-app:13
+          image: yasintahaerol/name-app:21
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
           volumeMounts:
-            - name: config-vol
-              mountPath: /app/config-vol/conf.json
-              readOnly: true
+            - name: config
+              mountPath: /app/config
+              readOnly: false
             - name: secret-vol
               mountPath: /etc/secret-vol
               readOnly: true
-        - name: side-container
-          image: nginx
+        - name: sidecar-container
+          image: yasintahaerol/sidecar:15
           volumeMounts:
-            - name: config-vol
-              mountPath: /etc/config-vol/conf.json
-              subPath: conf.json
+            - name: config
+              mountPath: /app/config
+              readOnly: false
             - name: secret-vol
               mountPath: /etc/secret-vol
+          ports:
+            - containerPort: 5050
       volumes:
-        - name: config-vol
-          configMap:
-            name: appconfig
-            items:
-              - key: my-conf.json
-                path: conf.json
+        - name: config
+          emptyDir: {}
         - name: secret-vol
           secret:
             secretName: my-secret
             #items:
               #- key: secret.conf
                 #path: secret.json
-
-
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: name-app
+  labels:
+    app: name-app
 
